@@ -1,0 +1,144 @@
+/*
+    Simple example on how to use PAA5100JE driver library.
+    Works in polling mode, reading at set frequency.
+    Created by Matej Bozic,
+    February, 2020.
+    https://github.com/zic-95
+*/
+
+#include <Arduino.h>
+#include <SPI.h>
+#include "PAA5100JE.h"
+
+// define SPI chip select pin
+#define OF1_CS_PIN 16
+
+// define interrupt motion_ready pin
+// #define OF1_MOTION_PIN 7
+
+// define sensor reset pin (only used if NRESET pin is not connected to 3.3V)
+//#define OF1_RESET_PIN 5
+
+
+#define OF_READ_FREQ 100 // Define reading frequency in Hz
+
+// Set to 1 if you want to use in mm mode (sensor height must be defined), or to 0 if you want to use counts mode
+#define USE_MM 0
+
+PAA5100JE_OF of1_sensor(OF1_CS_PIN);
+
+
+unsigned long prev_update_time;
+static uint32_t tTime;
+
+double of1_working_height = 17; // in mm
+double of2_working_height = 17; // in mm
+
+#if USE_MM == 0
+// Storing values in counts
+int16_t of1_delta_xy[2] = {0, 0};
+
+int16_t of1_xy[2] = {0, 0};
+
+#endif
+
+#if USE_MM == 1
+// Storing values in mm
+double of1_delta_xy_mm[2] = {0.0, 0.0};
+double of2_delta_xy_mm[2] = {0.0, 0.0};
+double of1_xy_mm[2] = {0.0, 0.0};
+double of2_xy_mm[2] = {0.0, 0.0};
+#endif
+
+void setup()
+{
+    Serial.begin(57600);
+    while (!Serial)
+        delay(10); // will pause Zero, Leonardo, etc until serial console opens
+    SPI.begin();
+    // Remove if NRESET pin is connected to 3.3V (e.g. in Pimoroni board)
+    //pinMode(OF1_RESET_PIN, OUTPUT);
+    
+    //digitalWrite(OF1_RESET_PIN, HIGH);
+    
+
+    if (of1_sensor.init() == false)
+    {
+        while (true)
+        {
+            delay(1000);
+            Serial.println("Error in sensors initialization");
+        }
+    }
+    delay(100);
+    // Set sensor working height first.
+    // This can be done realtime using distance sensor, if sensor/surface height is changing.
+    of1_sensor.setWorkingHeight(of1_working_height);
+    
+    // Set X/Y axis orientation.
+    of1_sensor.setOrientation(true, false, false);
+    
+    delay(100);
+}
+void loop()
+{
+    uint32_t t = millis();
+    char serRead = Serial.read();
+    // Reset values
+    if (serRead == 'x')
+    {
+#if USE_MM == 0
+        of1_xy[0] = 0;
+        of1_xy[1] = 0;
+
+#endif
+#if USE_MM == 1
+        of1_xy_mm[0] = 0;
+        of1_xy_mm[1] = 0;
+
+#endif
+    }
+
+    // int squal = of1_sensor.getSqual();
+    // Serial.print(squal);
+    // Serial.print(" - ");
+
+
+    // Read values in normal mode (of1), burst mode (of2)
+    if ((t - tTime) >= (1000 / OF_READ_FREQ))
+    {
+#if USE_MM == 0
+        if (of1_sensor.motionRead(of1_delta_xy) == false)
+            Serial.println("Error reading sensor 1 values");
+        else
+        {
+            of1_xy[0] += of1_delta_xy[0];
+            of1_xy[1] += of1_delta_xy[1];
+            Serial.print("X1: ");
+            Serial.print(of1_xy[0]);
+            Serial.print(" Y1: ");
+            Serial.print(of1_xy[1]);
+            Serial.print("\n");
+        }
+       
+#endif
+
+#if USE_MM == 1
+        if (of1_sensor.getDistance(of1_delta_xy_mm) == false)
+            Serial.println("Error reading sensor 1 values");
+        else
+        {
+            of1_xy_mm[0] += of1_delta_xy_mm[0];
+            of1_xy_mm[1] += of1_delta_xy_mm[1];
+            Serial.print("X1: ");
+            Serial.print(of1_xy_mm[0]);
+            Serial.print(" mm Y1: ");
+            Serial.print(of1_xy_mm[1]);
+            Serial.print(" mm\n");
+        }
+        
+#endif
+
+        tTime = t;
+    }
+}
