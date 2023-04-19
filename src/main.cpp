@@ -46,8 +46,7 @@ TaskHandle_t  receiveHandle ;
 
 void setup()
 {
-    Wire1.flush();
-    Wire1.begin(SDA1, SCL1,1000000);
+    
     delay(100);
     Serial.println("------------------ SETUP --------------------"); 
    
@@ -58,7 +57,11 @@ void setup()
     
     // delay(100);
     // imuProcessor->reset();
-    delay(1000);
+    delay(500);
+    Wire1.flush();
+    Wire1.setPins(SDA1, SCL1);
+    Wire1.setClock(1000000);
+    // Wire1.begin(SDA1, SCL1,1000000);
     imuProcessor->init(&Wire1);
     if(!imuProcessor->isConnected())
     {
@@ -105,6 +108,7 @@ void loop()
         // Serial.println(diff);
         neighbourhood->process();
     }
+    imuProcessor->process();
    
     //delay(5);
 }

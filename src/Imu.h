@@ -1,7 +1,7 @@
 #ifndef __IMU__
 #define __IMU__
 // #include <SparkFun_BNO080_Arduino_Library.h>
-#include "bno08x/AdafruitBno08x.h"
+#include "AdafruitBno08x.h"
 #include <ArduinoJson.h>
 #include <bitset>
 #define BNO08X_RESET -1
