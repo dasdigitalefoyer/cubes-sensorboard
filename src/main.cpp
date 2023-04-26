@@ -20,6 +20,8 @@ const String MSG_SUFFIX_ACK = "ACK";
 const String MSG_SUFFIX_DONE = "DONE";
 const String MSG_SUFFIX_FAIL = "FAIL";
 
+const int IMU_RESET_PIN = 8;
+
 
 
 void processMessage(void * parameter);
@@ -39,7 +41,7 @@ const double relativeMotionHeight = 17;
 
 
 
-ImuProcessor* imuProcessor = new ImuProcessor(100);
+ImuProcessor* imuProcessor = new ImuProcessor(100, IMU_RESET_PIN);
 RelativeMotion* relativeMotion = new RelativeMotion(100, relativeMotionHeight);
 Neighbourhood* neighbourhood = new Neighbourhood();
 TaskHandle_t  receiveHandle ; 
@@ -49,7 +51,8 @@ void setup()
     
     delay(100);
     Serial.println("------------------ SETUP --------------------"); 
-   
+    pinMode(SDA1, INPUT_PULLUP);
+    pinMode(SCL1, INPUT_PULLUP);
     // Wire1.begin();
     Serial.begin(230400);
     while (!Serial)
@@ -59,20 +62,28 @@ void setup()
     // imuProcessor->reset();
     delay(500);
     Wire1.flush();
-    Wire1.setPins(SDA1, SCL1);
-    Wire1.setClock(1000000);
-    // Wire1.begin(SDA1, SCL1,1000000);
-    imuProcessor->init(&Wire1);
+    // Wire1.setBufferSize(64);
+    // Wire1.setTimeOut(1000);
+    
+    // Wire1.setPins(SDA1, SCL1);
+    
+    // Wire1.setClock(1000000);
+    // Wire1.setClock(50000);
+     Wire1.begin(SDA1, SCL1,400000);
+     delay(500);
+
+    imuProcessor->init(&Wire1, 10);
     if(!imuProcessor->isConnected())
     {
         printMessage("SensorBoard:setup: IMU not connected !!!");
     }
-    Wire1.end();
-    relativeMotion->init();
-    if(!relativeMotion->isConnected())
-    {
-        printMessage("SensorBoard:setup: Optical Flow not connected !!!");
-    }
+
+    // Wire1.end();
+    // relativeMotion->init();
+    // if(!relativeMotion->isConnected())
+    // {
+    //     printMessage("SensorBoard:setup: Optical Flow not connected !!!");
+    // }
     neighbourhood->init(&Wire1);
     if(!neighbourhood->isConnected())
     {
@@ -80,10 +91,12 @@ void setup()
     }
     // imuProcessor->start();
     // xTaskCreate(processMessage,"RECEIVE_SERIAL",1000,NULL,0,&receiveHandle);
-    Wire.begin();
+    // Wire.begin();
     Serial.println("------------------ SETUP END --------------------"); 
-
+    //  Wire1.setClock(50000);
     startTime = millis();
+
+     Wire1.setClock(200000);
 }
 
 void loop()
@@ -95,7 +108,7 @@ void loop()
     frameStart = millis();
     
     
-    relativeMotion->process();
+    // relativeMotion->process();
 
     //int nhRemainder = (frameStart - startTime) % (targetFrameTimeNeighbourhood );
     int frame = (frameStart - startTime) / (targetFrameTimeNeighbourhood );

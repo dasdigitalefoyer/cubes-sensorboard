@@ -13,7 +13,7 @@ public:
     // enum class State { UNINITIALIZED, INITIALIZING, INITIALIZED, STARTED, STOPPED };
 
 
-    ImuProcessor(int frameRate = 50)  : mpu(BNO08X_RESET)
+    ImuProcessor(int frameRate = 50, int resetPin = -1)  : mpu(resetPin)
     {
         // i2c_semaphore = xSemaphoreCreateMutex();
         this->frameRate = frameRate;
@@ -71,7 +71,7 @@ public:
     // State getState() { return state; }
 
     SemaphoreHandle_t i2c_semaphore = NULL;
-    void init( TwoWire *wire, int tries = 2)
+    void init( TwoWire *wire , int tries = 2)
     {
         
         Serial.println("INITIALIZING IMU");
@@ -81,13 +81,18 @@ public:
 
         
         int i=0;
-       
+        
         while (i++<tries) { 
             if (!mpu.begin_I2C(BNO08x_I2CADDR_DEFAULT,wire)) {
             //if (!bno08x.begin_UART(&Serial1)) {  // Requires a device with > 300 byte UART buffer!
             //if (!bno08x.begin_SPI(BNO08X_CS, BNO08X_INT)) {
                 Serial.println("Failed to find BNO08x chip");
-                
+                // wire->flush();
+                // wire->end();
+                // wire->begin();
+                // ESP.restart();
+                this->reset();
+                 delay(200);
             }
             else{
                 connected =true;
@@ -146,11 +151,11 @@ public:
 
     }
 
-    // void reset()
-    // {
-    //     mpu.hardwareReset();
-    //     delay(500);
-    // }
+    void reset()
+    {
+        mpu.hardwareReset();
+        delay(500);
+    }
 
     bool isConnected() { return connected;}
 

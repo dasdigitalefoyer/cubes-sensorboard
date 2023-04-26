@@ -14,9 +14,14 @@ class Contact
 {
 private:
   int address = 0;
-  int minData = 120;
+  int minData = 0;  //120
   bool connected = false;
   TwoWire *wireInterface;
+
+  
+  int calibrationSteps = 10;
+  float average = 0;
+  bool state = false;
 
 public:
   Contact(int address = 10)
@@ -36,16 +41,22 @@ public:
     }
     if (wireInterface->available())
     {
+       while (wireInterface->available())
+         (wireInterface->read() + 48);
       Serial.println("CONTACT CONNECTED");
       connected = true;
     }
   }
   bool isConnected() { return connected; }
 
+  float getAverage() {return average; }
+  bool getState() {return state; }
+
   bool process(int *data)
   {
     if (!connected)
       return false;
+    
     unsigned long time = micros() + 100;
 
     String dataChar = "";
@@ -58,10 +69,22 @@ public:
 
     int d = dataChar.toInt();
 
+
     if (d != 0)
       d = abs(d - 512);
     else return false;
+    if(calibrationSteps > 0)
+    {
+      calibrationSteps = calibrationSteps -1;
+      minData = max(d+1,minData) ;
+       Serial.print("CALIBRATING CONTACT: ");
+       Serial.println(calibrationSteps);
+      return true;
+    }
     d = max((d - minData), 0);
+    average = 0.75 * average + 0.25*d;
+    if(average > 12) state = true;
+    else if(average < 3) state = false;
     *data=d;
     return true;
   }
@@ -77,14 +100,15 @@ private:
   const String frameStop = "}}]}";
   
  
-  String processContact(String name, Contact c)
+  String processContact(String name, Contact* c)
   { 
     //if(!c.isConnected()) return "";
     int data = 0;
     String s = "\"" + name + "\":" ;
-    if(c.isConnected() && c.process(&data))
+    if(c->isConnected() && c->process(&data))
     {
-      s+=  "{\"connected\" : " + String((data != 0) ? "true" : "false") + ",";
+      
+      s+=  "{\"connected\" : " + String((c->getState() ? "true" : "false")) + ",";
       s+= "\"raw\" : " + String(data) + "}";
     }
     else
@@ -103,6 +127,11 @@ private:
   Contact right;
   Contact front;
   Contact back;
+
+  int contactLeftAvg = 0;
+  int contactRightAvg = 0;
+  int contactFrontAvg = 0;
+  int contactBackAvg = 0;
 
 public:
   Neighbourhood(int addLeft = 10, int addRight = 11, int addFront = 12, int addBack = 13) : left(addLeft),
@@ -137,13 +166,13 @@ public:
       return;
 
     Serial.print(frameStart);
-    Serial.print(processContact("left", left));
+    Serial.print(processContact("left", &left));
     Serial.print(",");
-    Serial.print(processContact("right", right));
+    Serial.print(processContact("right", &right));
     Serial.print(",");
-    Serial.print(processContact("front", front));
+    Serial.print(processContact("front", &front));
     Serial.print(",");
-    Serial.print(processContact("back", back));
+    Serial.print(processContact("back", &back));
     Serial.println(frameStop);
   }
 };
