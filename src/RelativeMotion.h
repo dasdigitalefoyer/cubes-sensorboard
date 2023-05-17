@@ -90,7 +90,7 @@ class RelativeMotion
             // Set sensor working height first.
             // This can be done realtime using distance sensor, if sensor/surface height is changing.
             sensor.setWorkingHeight(height);
-            sensor.setOrientation(true, false, true);
+            sensor.setOrientation(false, true, true);
     
             delay(100);
 

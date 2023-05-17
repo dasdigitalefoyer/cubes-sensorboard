@@ -22,6 +22,8 @@ private:
   int calibrationSteps = 10;
   float average = 0;
   bool state = false;
+  int raw;
+  
 
 public:
   Contact(int address = 10)
@@ -50,7 +52,9 @@ public:
   bool isConnected() { return connected; }
 
   float getAverage() {return average; }
+  float getOffset() {return minData; }
   bool getState() {return state; }
+
 
   bool process(int *data)
   {
@@ -69,10 +73,12 @@ public:
 
     int d = dataChar.toInt();
 
-
+  
     if (d != 0)
-      d = abs(d - 512);
+      //d = abs(d - 512);
+      d = abs(d - 0);
     else return false;
+     raw = d  ;
     if(calibrationSteps > 0)
     {
       calibrationSteps = calibrationSteps -1;
@@ -85,7 +91,8 @@ public:
     average = 0.75 * average + 0.25*d;
     if(average > 12) state = true;
     else if(average < 3) state = false;
-    *data=d;
+    *data=raw;
+   
     return true;
   }
 };
@@ -109,7 +116,9 @@ private:
     {
       
       s+=  "{\"connected\" : " + String((c->getState() ? "true" : "false")) + ",";
+      s+= "\"offset\" : " + String(c->getOffset()) + ",";
       s+= "\"raw\" : " + String(data) + "}";
+
     }
     else
     {
@@ -171,8 +180,8 @@ public:
     Serial.print(processContact("right", &right));
     Serial.print(",");
     Serial.print(processContact("front", &front));
-    Serial.print(",");
-    Serial.print(processContact("back", &back));
+    // Serial.print(",");
+    // Serial.print(processContact("back", &back));
     Serial.println(frameStop);
   }
 };

@@ -48,8 +48,8 @@ TaskHandle_t  receiveHandle ;
 
 void setup()
 {
-    
-    delay(100);
+    imuProcessor->reset();
+    delay(200);
     Serial.println("------------------ SETUP --------------------"); 
     pinMode(SDA1, INPUT_PULLUP);
     pinMode(SCL1, INPUT_PULLUP);
@@ -70,8 +70,9 @@ void setup()
     // Wire1.setClock(1000000);
     // Wire1.setClock(50000);
      Wire1.begin(SDA1, SCL1,400000);
-     delay(500);
+     delay(300);
 
+   
     imuProcessor->init(&Wire1, 10);
     if(!imuProcessor->isConnected())
     {
@@ -79,16 +80,16 @@ void setup()
     }
 
     // Wire1.end();
-    // relativeMotion->init();
-    // if(!relativeMotion->isConnected())
-    // {
-    //     printMessage("SensorBoard:setup: Optical Flow not connected !!!");
-    // }
-    neighbourhood->init(&Wire1);
-    if(!neighbourhood->isConnected())
+    relativeMotion->init(1);
+    if(!relativeMotion->isConnected())
     {
-        printMessage("SensorBoard:setup: Neighbourhood not connected !!!");
+        printMessage("SensorBoard:setup: Optical Flow not connected !!!");
     }
+    // neighbourhood->init(&Wire1);
+    // if(!neighbourhood->isConnected())
+    // {
+    //     printMessage("SensorBoard:setup: Neighbourhood not connected !!!");
+    // }
     // imuProcessor->start();
     // xTaskCreate(processMessage,"RECEIVE_SERIAL",1000,NULL,0,&receiveHandle);
     // Wire.begin();
@@ -96,32 +97,32 @@ void setup()
     //  Wire1.setClock(50000);
     startTime = millis();
 
-     Wire1.setClock(200000);
+     Wire1.setClock(100000);
 }
 
 void loop()
 {
-    // imuProcessor->process();
+    imuProcessor->process();
     //float frameTime = (frameStop - frameStart);
     // Serial.print("FrameTime: ");
     // Serial.println(frameTime,2);
     frameStart = millis();
     
     
-    // relativeMotion->process();
+    relativeMotion->process();
 
     //int nhRemainder = (frameStart - startTime) % (targetFrameTimeNeighbourhood );
-    int frame = (frameStart - startTime) / (targetFrameTimeNeighbourhood );
+    // int frame = (frameStart - startTime) / (targetFrameTimeNeighbourhood );
 
-    if(frameStart - targetFrameTimeNeighbourhood > lastNeighbourhoodUpdate- neighbourhoodTimeEpsilon)
-    {
-        // int diff = frameStart - lastNeighbourhoodUpdate;
-        lastNeighbourhoodUpdate = frameStart;
-        // Serial.print("NeighbourhoodUpdate:" );
-        // Serial.println(diff);
-        neighbourhood->process();
-    }
-    imuProcessor->process();
+    // if(frameStart - targetFrameTimeNeighbourhood > lastNeighbourhoodUpdate- neighbourhoodTimeEpsilon)
+    // {
+    //     // int diff = frameStart - lastNeighbourhoodUpdate;
+    //     lastNeighbourhoodUpdate = frameStart;
+    //     // Serial.print("NeighbourhoodUpdate:" );
+    //     // Serial.println(diff);
+    //     neighbourhood->process();
+    // }
+    // imuProcessor->process();
    
     //delay(5);
 }
