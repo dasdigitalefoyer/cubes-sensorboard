@@ -10,13 +10,17 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+#include <CustomSerial.h>
+
 class Contact
 {
 private:
-  int address = 0;
-  int minData = 0;  //120
+  uint8_t address = 0;
+  int upperBound = 0;  //120
+  int lowerBound = 0;
   bool connected = false;
-  TwoWire *wireInterface;
+  CustomSerial *wireInterface;
+  uint8_t buffer[3];
 
   
   int calibrationSteps = 10;
@@ -26,74 +30,71 @@ private:
   
 
 public:
-  Contact(int address = 10)
+  Contact(uint8_t address = 10)
   {
     this->address = address;
   }
-  void init(TwoWire *wireInterface)
+  void init(CustomSerial *wireInterface)
   {
     // Serial.println("INITIALIZING CONTACT");
     this->wireInterface = wireInterface;
-    wireInterface->begin();
+    lowerBound = 0xFFFF;
+    upperBound = 0x0000;
 
-    wireInterface->requestFrom(address, 4);
-    unsigned long time = millis() + 500;
-    while (!wireInterface->available() && time > millis())
-    {
-    }
-    if (wireInterface->available())
-    {
-       while (wireInterface->available())
-         (wireInterface->read() + 48);
-      Serial.println("CONTACT CONNECTED");
+    int temp;
+    for(int i = 0; i < 100; i++){
+      delay(1);
+      int error = this->wireInterface->Recive(buffer, 3, this->address);
+      Serial.print(error);
+      Serial.print("\t");
+      Serial.print("BUFFER: ");
+      Serial.print(buffer[0]);
+      Serial.print(buffer[1]);
+      Serial.println(buffer[2]);
+      if(buffer[0] != this->address)
+        continue;
+      temp = abs(buffer[1] + buffer[2] * 256);
+      lowerBound = min(temp, lowerBound);
+      upperBound = max(temp, upperBound);
       connected = true;
+      Serial.println("CONTACT CONNECTED");
     }
+    lowerBound -= 10;
+    upperBound += 10;
+    
+    // wireInterface->requestFrom(address, 4);
+    // unsigned long time = millis() + 500;
+    // while (!wireInterface->available() && time > millis())
+    // {
+    // }
+    // if (wireInterface->available())
+    // {
+    //    while (wireInterface->available())
+    //      (wireInterface->read() + 48);
+    //   Serial.println("CONTACT CONNECTED");
+    //   connected = true;
+    // }
   }
   bool isConnected() { return connected; }
 
   float getAverage() {return average; }
-  float getOffset() {return minData; }
+  float getOffset() {return lowerBound; }
   bool getState() {return state; }
 
 
   bool process(int *data)
   {
-    if (!connected)
-      return false;
+      if (!connected)
+        return false;
+      
     
-    unsigned long time = micros() + 100;
+      this->wireInterface->Recive(buffer, 3, this->address);
+      if(buffer[0] != this->address)
+        Serial.println("<Neighbourhood>::sensor not found: " + this->address);
+      else
+        raw = buffer[1] + buffer[2] * 256;
 
-    String dataChar = "";
-    wireInterface->requestFrom(address, 4);
-    while (!wireInterface->available() && time > micros())
-      ;
-
-    while (wireInterface->available())
-      dataChar += (char)(wireInterface->read() + 48);
-
-    int d = dataChar.toInt();
-
-  
-    if (d != 0)
-      //d = abs(d - 512);
-      d = abs(d - 0);
-    else return false;
-     raw = d  ;
-    if(calibrationSteps > 0)
-    {
-      calibrationSteps = calibrationSteps -1;
-      minData = max(d+1,minData) ;
-       Serial.print("CALIBRATING CONTACT: ");
-       Serial.println(calibrationSteps);
-      return true;
-    }
-    d = max((d - minData), 0);
-    average = 0.75 * average + 0.25*d;
-    if(average > 12) state = true;
-    else if(average < 3) state = false;
-    *data=raw;
-   
-    return true;
+      return raw < lowerBound || upperBound < raw;
   }
 };
 
@@ -105,6 +106,8 @@ private:
 
   const String frameStart = "{\"sensorEvents\": [{\"neighbourhood\":{";
   const String frameStop = "}}]}";
+
+  CustomSerial *wireInterface = new CustomSerial(SDA, SCL, nullptr, nullptr, 0, 100);
   
  
   String processContact(String name, Contact* c)
@@ -143,7 +146,7 @@ private:
   int contactBackAvg = 0;
 
 public:
-  Neighbourhood(int addLeft = 10, int addRight = 11, int addFront = 12, int addBack = 13) : left(addLeft),
+  Neighbourhood(int addLeft = 0x0A, int addRight = 0x0B, int addFront = 0x0C, int addBack = 0x0D) : left(addLeft),
                                                                                             right(addRight),
                                                                                             front(addFront),
                                                                                             back(addBack)
@@ -153,7 +156,7 @@ public:
 
   bool isConnected() { return connected; }
 
-  void init(TwoWire *wireInterface)
+  void init()
   {
     Serial.println("INITIALIZING NEIGHBOURHOOD");
     // this->wireInterface = wireInterface;
@@ -180,11 +183,10 @@ public:
     Serial.print(processContact("right", &right));
     Serial.print(",");
     Serial.print(processContact("front", &front));
-    // Serial.print(",");
-    // Serial.print(processContact("back", &back));
+    Serial.print(",");
+    Serial.print(processContact("back", &back));
     Serial.println(frameStop);
   }
 };
-
 
 #endif //__NEIGHBOURHOOD__
