@@ -553,9 +553,9 @@ private:
             Serial.println("Could not enable SH2_ROTATION_VECTOR");
         }
         
-        if (! mpu.enableReport(SH2_LINEAR_ACCELERATION, 1000000.0/frLinAcc)) {
-            Serial.println("Could not enable SH2_LINEAR_ACCELERATION");
-        }
+        // if (! mpu.enableReport(SH2_LINEAR_ACCELERATION, 1000000.0/frLinAcc)) {
+        //     Serial.println("Could not enable SH2_LINEAR_ACCELERATION");
+        // }
         /*
         // if (! mpu.enableReport(SH2_ACCELEROMETER, 1000000.0/frLinAcc)) {
         //     Serial.println("Could not enable SH2_ACCELEROMETER");

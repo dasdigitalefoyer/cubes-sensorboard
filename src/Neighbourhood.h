@@ -45,19 +45,19 @@ public:
     for(int i = 0; i < 100; i++){
       delay(1);
       int error = this->wireInterface->Recive(buffer, 3, this->address);
-      Serial.print(error);
-      Serial.print("\t");
-      Serial.print("BUFFER: ");
-      Serial.print(buffer[0]);
-      Serial.print(buffer[1]);
-      Serial.println(buffer[2]);
+      // Serial.print(error);
+      // Serial.print("\t");
+      // // Serial.print("BUFFER: ");
+      // Serial.print(buffer[0]);
+      // Serial.print(buffer[1]);
+      // Serial.println(buffer[2]);
       if(buffer[0] != this->address)
         continue;
       temp = abs(buffer[1] + buffer[2] * 256);
       lowerBound = min(temp, lowerBound);
       upperBound = max(temp, upperBound);
       connected = true;
-      Serial.println("CONTACT CONNECTED");
+      // Serial.println("CONTACT CONNECTED");
     }
     lowerBound -= 10;
     upperBound += 10;
@@ -84,17 +84,21 @@ public:
 
   bool process(int *data)
   {
-      if (!connected)
-        return false;
+      // if (!connected)
+      //   return false;
       
     
       this->wireInterface->Recive(buffer, 3, this->address);
       if(buffer[0] != this->address)
-        Serial.println("<Neighbourhood>::sensor not found: " + this->address);
+      {
+        // Serial.println("<Neighbourhood>::sensor not found: " + String(this->address));
+        return false;
+      }
+        
       else
         raw = buffer[1] + buffer[2] * 256;
-
-      return raw < lowerBound || upperBound < raw;
+      state = raw < lowerBound || upperBound < raw;
+      return true;
   }
 };
 
@@ -107,7 +111,7 @@ private:
   const String frameStart = "{\"sensorEvents\": [{\"neighbourhood\":{";
   const String frameStop = "}}]}";
 
-  CustomSerial *wireInterface = new CustomSerial(SDA, SCL, nullptr, nullptr, 0, 100);
+   CustomSerial *wireInterface = new CustomSerial(SDA, SCL, nullptr, nullptr, 0, 100);
   
  
   String processContact(String name, Contact* c)
@@ -146,7 +150,7 @@ private:
   int contactBackAvg = 0;
 
 public:
-  Neighbourhood(int addLeft = 0x0A, int addRight = 0x0B, int addFront = 0x0C, int addBack = 0x0D) : left(addLeft),
+  Neighbourhood(int addLeft =0x0B , int addRight = 0x0A, int addFront = 0x0C, int addBack = 0x0D) : left(addLeft),
                                                                                             right(addRight),
                                                                                             front(addFront),
                                                                                             back(addBack)
@@ -158,17 +162,22 @@ public:
 
   void init()
   {
-    Serial.println("INITIALIZING NEIGHBOURHOOD");
-    // this->wireInterface = wireInterface;
-    // wireInterface->begin();
+    
+     Serial.println("INITIALIZING NEIGHBOURHOOD");
+    // // this->wireInterface = wireInterface;
+    // // wireInterface->begin();
     Serial.println("INITIALIZING LEFT");
     left.init(wireInterface);
+    delay(5);
     Serial.println("INITIALIZING BACK");
     back.init(wireInterface);
+    delay(5);
     Serial.println("INITIALIZING FRONT");
     front.init(wireInterface);
+    delay(5);
     Serial.println("INITIALIZING RIGHT");
     right.init(wireInterface);
+    delay(5);
     connected = true; // TODO: check each connectionm state ?
   }
 

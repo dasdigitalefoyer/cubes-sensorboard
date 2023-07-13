@@ -32,7 +32,7 @@ int frameStart = 0;
 int frameStop = 0;
 int counter = 0;
 
-int targetFrameTimeNeighbourhood = 100 ; // ms => 10Hz
+int targetFrameTimeNeighbourhood = 500 ; // ms => 10Hz
 int neighbourhoodTimeEpsilon = targetFrameTimeNeighbourhood * 0.01;
 int lastNeighbourhoodUpdate = 0;
 int startTime = 0;
@@ -111,13 +111,13 @@ void loop()
     frameStart = millis();
     
     
-    relativeMotion->process();
+    // relativeMotion->process();
 
     //int nhRemainder = (frameStart - startTime) % (targetFrameTimeNeighbourhood );
     // int frame = (frameStart - startTime) / (targetFrameTimeNeighbourhood );
 
 
-    // NEIGHBOURHOOD - START
+    // // NEIGHBOURHOOD - START
     if(frameStart - targetFrameTimeNeighbourhood > lastNeighbourhoodUpdate- neighbourhoodTimeEpsilon)
     {
         // int diff = frameStart - lastNeighbourhoodUpdate;
@@ -126,7 +126,7 @@ void loop()
         // Serial.println(diff);
         neighbourhood->process();
     }
-    // NEIGHBOURHOOD - STOP
+    // // NEIGHBOURHOOD - STOP
    
    
     //delay(5);
