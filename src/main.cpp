@@ -77,7 +77,7 @@ void setup()
     }
 
    
-    relativeMotion->init(1);
+    relativeMotion->init(3);
     if(!relativeMotion->isConnected())
     {
         printMessage("SensorBoard:setup: Optical Flow not connected !!!");
@@ -111,7 +111,7 @@ void loop()
     frameStart = millis();
     
     
-    // relativeMotion->process();
+    relativeMotion->process();
 
     //int nhRemainder = (frameStart - startTime) % (targetFrameTimeNeighbourhood );
     // int frame = (frameStart - startTime) / (targetFrameTimeNeighbourhood );
