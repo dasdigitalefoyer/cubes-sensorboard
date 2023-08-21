@@ -77,7 +77,7 @@ void setup()
     }
 
    
-    relativeMotion->init(1);
+    relativeMotion->init(3);
     if(!relativeMotion->isConnected())
     {
         printMessage("SensorBoard:setup: Optical Flow not connected !!!");
