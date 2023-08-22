@@ -32,7 +32,7 @@ int frameStart = 0;
 int frameStop = 0;
 int counter = 0;
 
-int targetFrameTimeNeighbourhood = 500 ; // ms => 10Hz
+int targetFrameTimeNeighbourhood = 500 ; // ms => 2Hz
 int neighbourhoodTimeEpsilon = targetFrameTimeNeighbourhood * 0.01;
 int lastNeighbourhoodUpdate = 0;
 int startTime = 0;
@@ -104,6 +104,7 @@ void setup()
 
 void loop()
 {
+    // delay(100); return;
     imuProcessor->process();
     //float frameTime = (frameStop - frameStart);
     // Serial.print("FrameTime: ");

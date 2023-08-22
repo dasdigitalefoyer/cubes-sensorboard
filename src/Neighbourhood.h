@@ -60,13 +60,18 @@ public:
       // Serial.println("CONTACT CONNECTED");
     }
     if(lowerBound - upperBound > 30000)
+    {
       connected = false;
+      Serial.println("CONTACT NOT CONNECTED");
+      return;
+    }
+    Serial.println("CONTACT CONNECTED");
     lowerBound -= 30;
     upperBound += 30;
 
     
-     Serial.println(lowerBound);
-    Serial.println(upperBound);
+    //  Serial.println(lowerBound);
+    // Serial.println(upperBound);
     // wireInterface->requestFrom(address, 4);
     // unsigned long time = millis() + 500;
     // while (!wireInterface->available() && time > millis())
@@ -121,7 +126,7 @@ private:
  
   String processContact(String name, Contact* c)
   { 
-    //if(!c.isConnected()) return "";
+    
     int data = 0;
     String s = "\"" + name + "\":" ;
     if(c->isConnected() && c->process(&data))
