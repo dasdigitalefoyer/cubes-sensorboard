@@ -59,9 +59,14 @@ public:
       connected = true;
       // Serial.println("CONTACT CONNECTED");
     }
-    lowerBound -= 10;
-    upperBound += 10;
+    if(lowerBound - upperBound > 30000)
+      connected = false;
+    lowerBound -= 30;
+    upperBound += 30;
+
     
+     Serial.println(lowerBound);
+    Serial.println(upperBound);
     // wireInterface->requestFrom(address, 4);
     // unsigned long time = millis() + 500;
     // while (!wireInterface->available() && time > millis())
