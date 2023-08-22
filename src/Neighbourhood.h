@@ -66,8 +66,8 @@ public:
       return;
     }
     Serial.println("CONTACT CONNECTED");
-    lowerBound -= 30;
-    upperBound += 30;
+    lowerBound -= 25;
+    upperBound += 25;
 
     
     //  Serial.println(lowerBound);
@@ -90,6 +90,7 @@ public:
   float getAverage() {return average; }
   float getOffset() {return lowerBound; }
   bool getState() {return state; }
+  int getRaw() {return raw; }
 
 
   bool process(int *data)
@@ -134,7 +135,7 @@ private:
       
       s+=  "{\"connected\" : " + String((c->getState() ? "true" : "false")) + ",";
       s+= "\"offset\" : " + String(c->getOffset()) + ",";
-      s+= "\"raw\" : " + String(data) + "}";
+      s+= "\"raw\" : " + String(c->getRaw()) + "}";
 
     }
     else

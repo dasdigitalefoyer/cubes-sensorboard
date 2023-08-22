@@ -104,13 +104,14 @@ void setup()
 
 void loop()
 {
-    // delay(100); return;
-    imuProcessor->process();
-    //float frameTime = (frameStop - frameStart);
+
+    frameStart = millis();
+       //float frameTime = (frameStop - frameStart);
     // Serial.print("FrameTime: ");
     // Serial.println(frameTime,2);
-    frameStart = millis();
-    
+ 
+        // delay(100); return;
+    imuProcessor->process();
     
     relativeMotion->process();
 
