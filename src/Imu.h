@@ -99,7 +99,7 @@ public:
                 break;
             }
                 
-            delay(1000); 
+            delay(500); 
         }
         if(!connected)
             return;
@@ -507,7 +507,7 @@ private:
    
     static const int capacity = JSON_OBJECT_SIZE(32);
 
-    const int frLinAcc = 100;        // Hz
+    const int frLinAcc = 50;        // Hz
     const int frRot = 50;
     
     const int frStability = 20;
@@ -572,9 +572,9 @@ private:
         //     Serial.println("Could not enable SH2_SHAKE_DETECTOR");
         // }
         */
-        if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/frRot)) {
-            Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
-        }
+        // if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/frRot)) {
+        //     Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
+        // }
         /*
         // if (! mpu.enableReport(SH2_TAP_DETECTOR)) {
         //     Serial.println("Could not enable SH2_TAP_DETECTOR");

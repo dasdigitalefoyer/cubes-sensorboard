@@ -9,107 +9,124 @@
 
 #include <Wire.h>
 #include <Arduino.h>
+#include "PN532_I2C.h"
+#include "PN532.h"
+#include <PWFusion_TCA9548A.h>
 
-#include <CustomSerial.h>
+#include <iomanip>
+#include <sstream>
+
+#define PN532DEBUG
+#define MIFAREDEBUG
+
 
 class Contact
 {
 private:
-  uint8_t address = 0;
-  int upperBound = 0;  //120
-  int lowerBound = 0;
+  PN532_I2C* pn532i2c = NULL; //(Wire);
+  
+  PN532* nfc = NULL;//(pn532i2c);
+
+  
+ 
   bool connected = false;
-  CustomSerial *wireInterface;
-  uint8_t buffer[3];
-
-  
-  int calibrationSteps = 10;
-  float average = 0;
+  String name = "Contact";
+  uint8_t buf[4];
+  uint8_t uid[7]; 
+  uint8_t uidLength;
+  String miscData = "";
+  std::string tagUID = "";
   bool state = false;
-  int raw;
   
 
+std::string hexStr(unsigned char *data, int len)
+{
+  std::stringstream ss;
+  ss << std::hex;
+  for (int i = 0; i < len-1; ++i)
+    ss << std::setw(2) << std::setfill('0') << std::uppercase << (int)data[i] << ":";
+  ss << std::setw(2) << std::setfill('0') << std::uppercase << (int)data[len-1];
+  
+  return ss.str();
+}
 public:
-  Contact(uint8_t address = 10)
+  Contact(const String& name) : name(name)
   {
-    this->address = address;
+    
   }
-  void init(CustomSerial *wireInterface)
+  void init(TwoWire& wireInterface)
   {
-    // Serial.println("INITIALIZING CONTACT");
-    this->wireInterface = wireInterface;
-    lowerBound = 0xFFFF;
-    upperBound = 0x0000;
+    Serial.printf("INITIALIZING CONTACT: %s \r\n", name.c_str());
+    
 
-    int temp;
-    for(int i = 0; i < 100; i++){
-      delay(1);
-      int error = this->wireInterface->Recive(buffer, 3, this->address);
-      // Serial.print(error);
-      // Serial.print("\t");
-      // // Serial.print("BUFFER: ");
-      // Serial.print(buffer[0]);
-      // Serial.print(buffer[1]);
-      // Serial.println(buffer[2]);
-      if(buffer[0] != this->address)
-        continue;
-      temp = abs(buffer[1] + buffer[2] * 256);
-      lowerBound = min(temp, lowerBound);
-      upperBound = max(temp, upperBound);
-      connected = true;
-      // Serial.println("CONTACT CONNECTED");
-    }
-    if(lowerBound - upperBound > 30000)
+    pn532i2c = new PN532_I2C(wireInterface);
+    nfc = new PN532(*pn532i2c);
+
+    nfc->begin();
+    uint32_t versiondata = nfc->getFirmwareVersion();
+    if (!versiondata)
     {
-      connected = false;
-      Serial.println("CONTACT NOT CONNECTED");
+      Serial.println("Didn't find PN53x board");
       return;
     }
-    Serial.println("CONTACT CONNECTED");
-    lowerBound -= 25;
-    upperBound += 25;
+    nfc->setPassiveActivationRetries(0x01);
 
-    
-    //  Serial.println(lowerBound);
-    // Serial.println(upperBound);
-    // wireInterface->requestFrom(address, 4);
-    // unsigned long time = millis() + 500;
-    // while (!wireInterface->available() && time > millis())
-    // {
-    // }
-    // if (wireInterface->available())
-    // {
-    //    while (wireInterface->available())
-    //      (wireInterface->read() + 48);
-    //   Serial.println("CONTACT CONNECTED");
-    //   connected = true;
-    // }
+    connected = true;
+    // Got ok data, print it out!
+    Serial.print("Found chip PN5");
+    Serial.println((versiondata >> 24) & 0xFF, HEX);
+    Serial.print("Firmware ver. ");
+    Serial.print((versiondata >> 16) & 0xFF, DEC);
+    Serial.print('.');
+    Serial.println((versiondata >> 8) & 0xFF, DEC);
+
+    // configure board to read RFID tags
+    nfc->SAMConfig();
+
+    Serial.printf("%s: CONNECTED \r\n" , name.c_str());  
+
   }
   bool isConnected() { return connected; }
 
-  float getAverage() {return average; }
-  float getOffset() {return lowerBound; }
-  bool getState() {return state; }
-  int getRaw() {return raw; }
 
+  
+  bool getState() {return state; }
+  String getName() { return name; }
+  String getData() { return String(tagUID.c_str()); }
+  String getUID() { return String(tagUID.c_str()); }
 
   bool process(int *data)
   {
-      // if (!connected)
-      //   return false;
-      
-    
-      this->wireInterface->Recive(buffer, 3, this->address);
-      if(buffer[0] != this->address)
-      {
-        // Serial.println("<Neighbourhood>::sensor not found: " + String(this->address));
+      if (!connected)
         return false;
-      }
-        
-      else
-        raw = buffer[1] + buffer[2] * 256;
-      state = raw < lowerBound || upperBound < raw;
+
+    //uint8_t password[4] =  {0x12, 0x34, 0x56, 0x78};
+    
+
+       // wait until a tag is present
+    if (!nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength,0,true)) {
+      state = false;
+      tagUID = "";
+      miscData = "";
       return true;
+    }
+    state = true;
+    if(tagUID.empty())
+    {
+        tagUID = hexStr(uid, uidLength);
+        // for (byte i = 0; i < uidLength;i++) {  
+        //     tagUID+= uid[i] < 0x10 ? " 0" : ":";
+        //     tagUID+=String(uid[i],HEX);
+         
+        // }
+       
+    }
+   
+    
+    
+    return true;
+   
+    
   }
 };
 
@@ -121,22 +138,30 @@ private:
 
   const String frameStart = "{\"sensorEvents\": [{\"neighbourhood\":{";
   const String frameStop = "}}]}";
+  int index = 0;
+  String serialString = "";
 
-   CustomSerial *wireInterface = new CustomSerial(SDA, SCL, nullptr, nullptr, 0, 100);
+   //TwoWire *wireInterface;
   
  
-  String processContact(String name, Contact* c)
+  String processContact(Contact* c)
   { 
     
     int data = 0;
+    String name = c->getName();
+    name.toLowerCase();
     String s = "\"" + name + "\":" ;
     if(c->isConnected() && c->process(&data))
     {
       
-      s+=  "{\"connected\" : " + String((c->getState() ? "true" : "false")) + ",";
-      s+= "\"offset\" : " + String(c->getOffset()) + ",";
-      s+= "\"raw\" : " + String(c->getRaw()) + "}";
-
+      s+=  "{\"connected\": " + String((c->getState() ? "true" : "false"));
+      if(c->getState())
+      {
+        s+= ",";
+        s+= "\"id\": \"" + String(c->getUID()) + "\"";// + ",";
+      // s+= "\"raw\" : " + String(c->getRaw()) ;
+      }
+      s+= "}";
     }
     else
     {
@@ -160,35 +185,43 @@ private:
   int contactFrontAvg = 0;
   int contactBackAvg = 0;
 
+  TCA9548A i2cMux;
+
 public:
-  Neighbourhood(int addLeft =0x0B , int addRight = 0x0A, int addFront = 0x0C, int addBack = 0x0D) : left(addLeft),
-                                                                                            right(addRight),
-                                                                                            front(addFront),
-                                                                                            back(addBack)
+  Neighbourhood(int channelLeft =0 , int channelRight = 1, int channelFront = 2, int channelBack = 3) : left("LEFT"),
+                                                                                            right("RIGHT"),
+                                                                                            front("FRONT"),
+                                                                                            back("BACK")
+                                                                                            
   {
 
   }
 
   bool isConnected() { return connected; }
 
-  void init()
+  void init(TwoWire& wireInterface)
   {
+    i2cMux.begin(0U,wireInterface );
+    Serial.println("INITIALIZING NEIGHBOURHOOD");
     
-     Serial.println("INITIALIZING NEIGHBOURHOOD");
     // // this->wireInterface = wireInterface;
     // // wireInterface->begin();
     Serial.println("INITIALIZING LEFT");
+    i2cMux.setChannel(CHAN0); 
     left.init(wireInterface);
-    delay(5);
+    delay(10);
     Serial.println("INITIALIZING BACK");
+    i2cMux.setChannel(CHAN1); 
     back.init(wireInterface);
-    delay(5);
+    delay(10);
     Serial.println("INITIALIZING FRONT");
+    i2cMux.setChannel(CHAN2); 
     front.init(wireInterface);
-    delay(5);
+    delay(10);
     Serial.println("INITIALIZING RIGHT");
+     i2cMux.setChannel(CHAN3); 
     right.init(wireInterface);
-    delay(5);
+    delay(10);
     connected = true; // TODO: check each connectionm state ?
   }
 
@@ -197,15 +230,36 @@ public:
     if (!connected)
       return;
 
-    Serial.print(frameStart);
-    Serial.print(processContact("left", &left));
-    Serial.print(",");
-    Serial.print(processContact("right", &right));
-    Serial.print(",");
-    Serial.print(processContact("front", &front));
-    Serial.print(",");
-    Serial.print(processContact("back", &back));
-    Serial.println(frameStop);
+    switch(index)
+    {
+      case 0:
+        serialString += frameStart;
+        i2cMux.setChannel(CHAN0); 
+        serialString+=processContact( &left) + ",";
+      break;
+      case 1: 
+        i2cMux.setChannel(CHAN1); 
+        serialString+=processContact( &right) + ",";
+      break;
+      case 2:
+        i2cMux.setChannel(CHAN2); 
+        serialString+=processContact( &front) + ",";
+      break;
+      case 3:
+        i2cMux.setChannel(CHAN3); 
+        serialString+=processContact(&back);
+        serialString += frameStop;
+      break;
+      default:
+        index = 0;
+        Serial.println(serialString);
+        serialString = "";
+        return;
+
+      
+    }
+    
+    ++index;
   }
 };
 
