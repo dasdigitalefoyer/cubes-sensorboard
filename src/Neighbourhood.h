@@ -110,6 +110,7 @@ public:
       miscData = "";
       return true;
     }
+    
     state = true;
     if(tagUID.empty())
     {
