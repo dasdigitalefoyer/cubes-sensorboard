@@ -72,7 +72,7 @@ public:
     nfc->setPassiveActivationRetries(0x01);
 
     connected = true;
-    // Got ok data, print it out!
+    
     Serial.print("Found chip PN5");
     Serial.println((versiondata >> 24) & 0xFF, HEX);
     Serial.print("Firmware ver. ");
@@ -209,19 +209,19 @@ public:
     Serial.println("INITIALIZING LEFT");
     i2cMux.setChannel(CHAN0); 
     left.init(wireInterface);
-    delay(10);
+    delay(50);
     Serial.println("INITIALIZING BACK");
     i2cMux.setChannel(CHAN1); 
     back.init(wireInterface);
-    delay(10);
+    delay(50);
     Serial.println("INITIALIZING FRONT");
     i2cMux.setChannel(CHAN2); 
     front.init(wireInterface);
-    delay(10);
+    delay(50);
     Serial.println("INITIALIZING RIGHT");
      i2cMux.setChannel(CHAN3); 
     right.init(wireInterface);
-    delay(10);
+    delay(50);
     connected = true; // TODO: check each connectionm state ?
   }
 
@@ -229,13 +229,15 @@ public:
   {
     if (!connected)
       return;
-
+   
     switch(index)
     {
       case 0:
+  
         serialString += frameStart;
         i2cMux.setChannel(CHAN0); 
         serialString+=processContact( &left) + ",";
+        
       break;
       case 1: 
         i2cMux.setChannel(CHAN1); 

@@ -5,8 +5,8 @@
 #include "Neighbourhood.h"
 #include <ArduinoJson.h>
 
-  #define _TASK_TIMECRITICAL
- #define _TASK_SLEEP_ON_IDLE_RUN
+//#define _TASK_TIMECRITICAL
+ //#define _TASK_SLEEP_ON_IDLE_RUN
 
 const String MSG_CALIBRATE_ACCGYRO = "CALIBRATE_ACCGYRO";
 const String MSG_CALIBRATE_MAG = "CALIBRATE_MAG";
@@ -48,13 +48,13 @@ Neighbourhood *neighbourhood = new Neighbourhood();
 
 Scheduler runner;
 Task wire1Task(10, TASK_FOREVER, &wire1Processing);
-Task wire0Task(150, TASK_FOREVER, &wire0Processing);
+Task wire0Task(200, TASK_FOREVER, &wire0Processing);
 
 
 void setup()
 {
 
-    Serial.begin(115200 );
+    Serial.begin(230400 );
     while (!Serial)
         delay(100); // will pause Zero, Leonardo, etc until serial console opens
 
@@ -78,12 +78,14 @@ void setup()
     {
         printMessage("SensorBoard:setup: Optical Flow not connected !!!");
     }
+    delay(100);
+    // Wire.flush();
     pinMode(SDA, PULLUP);
     pinMode(SCL, PULLUP);
-    Wire.begin(SDA, SCL, 1000000);
+    Wire.begin(SDA, SCL, 400000);
     
-    // Wire.setTimeOut(2);
-    delay(500);
+   
+    delay(100);
 
     neighbourhood->init(Wire);
     if (!neighbourhood->isConnected())
@@ -92,21 +94,25 @@ void setup()
     }
 
     Serial.println("------------------ SETUP END --------------------");
-
+    //  Wire.setTimeOut(2);
     startTime = millis();
-
     runner.init();
+    delay(500);
+   
     runner.addTask(wire0Task);
      wire0Task.enable();
 
     runner.addTask(wire1Task);
     wire1Task.enable();
 
+
 }
 
 void loop()
 {
+   
     runner.execute();
+   
 }
 
 void wire1Processing()
@@ -120,7 +126,7 @@ void wire1Processing()
 
 void wire0Processing()
 {
-    //Serial.println("wire0Processing");
+    // Serial.println("wire0Processing");
     neighbourhood->process();
 
     // Serial.printf("CLOCK: %i", Wire.getClock());
