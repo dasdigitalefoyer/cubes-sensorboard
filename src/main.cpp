@@ -5,7 +5,7 @@
 #include "Neighbourhood.h"
 #include <ArduinoJson.h>
 
-//#define _TASK_TIMECRITICAL
+#define _TASK_TIMECRITICAL
  //#define _TASK_SLEEP_ON_IDLE_RUN
 
 const String MSG_CALIBRATE_ACCGYRO = "CALIBRATE_ACCGYRO";
@@ -47,8 +47,8 @@ Neighbourhood *neighbourhood = new Neighbourhood();
 
 
 Scheduler runner;
-Task wire1Task(10, TASK_FOREVER, &wire1Processing);
-Task wire0Task(200, TASK_FOREVER, &wire0Processing);
+Task wire1Task(20, TASK_FOREVER, &wire1Processing);
+Task wire0Task(150, TASK_FOREVER, &wire0Processing);
 
 
 void setup()
@@ -82,7 +82,7 @@ void setup()
     // Wire.flush();
     pinMode(SDA, PULLUP);
     pinMode(SCL, PULLUP);
-    Wire.begin(SDA, SCL, 400000);
+    Wire.begin(SDA, SCL, 1000000);
     
    
     delay(100);

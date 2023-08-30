@@ -37,6 +37,8 @@ private:
   String miscData = "";
   std::string tagUID = "";
   bool state = false;
+
+  bool toggleState = false;
   
 
 std::string hexStr(unsigned char *data, int len)
@@ -105,13 +107,30 @@ public:
 
        // wait until a tag is present
     if (!nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength,0,true)) {
-      state = false;
-      tagUID = "";
-      miscData = "";
+      if(toggleState && state) 
+      {
+        state = false;
+        tagUID = "";
+        miscData = "";
+        
+        toggleState = false;    
+      }
+      if(state)
+        toggleState = true;
+     
+      
       return true;
     }
+    if(toggleState && !state) 
+    {
+      state = true;  
+      toggleState = false;    
+    }
+    if(!state)
+      toggleState = true;
+
+
     
-    state = true;
     if(tagUID.empty())
     {
         tagUID = hexStr(uid, uidLength);
