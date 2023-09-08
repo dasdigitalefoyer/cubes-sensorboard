@@ -39,47 +39,17 @@ public:
 
     
 
-    bool start()
-    {   
-        
-        BaseType_t xReturned;
-         
-        Serial.println("Starting TASK");
-        // xTaskCreatePinnedToCore(this->run,"IMU_RUN",1000,this,1,&runTaskHandle,0);
-        xReturned = xTaskCreate(this->run,"IMU_RUN",1000,this,1,&runTaskHandle);
-     
-         
-        // return false;
-        
-        if( xReturned == pdPASS )
-        {
-                Serial.println("TASK STARTED");  
-            /* The task was created.  Use the task's handle to delete the task. */
-            // vTaskDelete( runTaskHandle );
-        }
-        
-        return true;
-    }
-
-    void stop()
-    {
-        isRunning = false;
-        delay (1000);
-        vTaskDelete(runTaskHandle);
-    }
+   
 
     // State getState() { return state; }
 
-    SemaphoreHandle_t i2c_semaphore = NULL;
+   
     void init( TwoWire *wire , int tries = 2)
     {
         
         Serial.println("INITIALIZING IMU");
         
      
-        // xSemaphoreTake(i2c_semaphore, portMAX_DELAY);
-
-        
         int i=0;
         
         while (i++<tries) { 
@@ -104,8 +74,7 @@ public:
         if(!connected)
             return;
             
-        // xSemaphoreGive(i2c_semaphore);
-
+   
         for (int n = 0; n < mpu.prodIds.numEntries; n++) {
             Serial.print("Part ");
             Serial.print(mpu.prodIds.entry[n].swPartNumber);
@@ -145,8 +114,7 @@ public:
             
         setReports();
     
-        delay(500);
-       
+        // delay(500);       
      
 
     }
@@ -154,7 +122,7 @@ public:
     void reset()
     {
         mpu.hardwareReset();
-        delay(500);
+        delay(100);
     }
 
     bool isConnected() { return connected;}
@@ -505,7 +473,7 @@ private:
 
     bool connected = false;
    
-    static const int capacity = JSON_OBJECT_SIZE(32);
+    // static const int capacity = JSON_OBJECT_SIZE(32);
 
     const int frLinAcc = 50;        // Hz
     const int frRot = 50;
@@ -523,7 +491,7 @@ private:
 
     // StaticJsonDocument<capacity> imuJson;
 
-    TaskHandle_t  runTaskHandle ; 
+   
 
     volatile bool isRunning = false;
 
@@ -572,9 +540,9 @@ private:
         //     Serial.println("Could not enable SH2_SHAKE_DETECTOR");
         // }
         */
-        // if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/frRot)) {
-        //     Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
-        // }
+        if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/frRot)) {
+            Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
+        }
         /*
         // if (! mpu.enableReport(SH2_TAP_DETECTOR)) {
         //     Serial.println("Could not enable SH2_TAP_DETECTOR");
@@ -602,39 +570,6 @@ private:
         // }
     }
 
-
-    static void run( void * parameter ) 
-    { 
-        Serial.println("RUN STARTED");  
-
-        ImuProcessor* p = (ImuProcessor*)parameter;
-        // p->init();
-        delay(100);
-        while(1)
-        {
-            // Serial.println("TICK");
-            p->process();
-            yield();
-            delay (50);
-            // delay (1000.0/p->frameRate);
-            
-        }
-        Serial.println("RUN ENDED");
-        return;
-        // p->init();
-        // yield();
-        // p->isRunning = true;
-        // while(p->isRunning)
-        // { 
-        //     // Serial.print("running on Core: "); 
-        //     // Serial.println(xPortGetCoreID()); 
-
-            
-        //     p->process(1.0/p->frameRate);
-        //     yield();
-        //     delay (1.0/p->frameRate);
-        // } 
-    } 
 
     
 

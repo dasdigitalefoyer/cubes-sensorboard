@@ -71,7 +71,7 @@ public:
       Serial.println("Didn't find PN53x board");
       return;
     }
-    nfc->setPassiveActivationRetries(0x01);
+    nfc->setPassiveActivationRetries(0x00);
 
     connected = true;
     
@@ -106,7 +106,7 @@ public:
     
 
        // wait until a tag is present
-    if (!nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength,0,true)) {
+    if (!nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength,0,false)) {
       if(toggleState && state) 
       {
         state = false;
@@ -271,13 +271,12 @@ public:
         i2cMux.setChannel(CHAN3); 
         serialString+=processContact(&back);
         serialString += frameStop;
-      break;
-      default:
-        index = 0;
         Serial.println(serialString);
         serialString = "";
+        index = 0;
         return;
-
+      
+     
       
     }
     

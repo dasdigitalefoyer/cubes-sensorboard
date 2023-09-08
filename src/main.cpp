@@ -5,7 +5,7 @@
 #include "Neighbourhood.h"
 #include <ArduinoJson.h>
 
-#define _TASK_TIMECRITICAL
+// #define _TASK_TIMECRITICAL
  //#define _TASK_SLEEP_ON_IDLE_RUN
 
 const String MSG_CALIBRATE_ACCGYRO = "CALIBRATE_ACCGYRO";
@@ -34,10 +34,10 @@ int frameStart = 0;
 int frameStop = 0;
 int counter = 0;
 
-int targetFrameTimeNeighbourhood = 500; // ms => 2Hz
-int neighbourhoodTimeEpsilon = targetFrameTimeNeighbourhood * 0.01;
-int lastNeighbourhoodUpdate = 0;
-int startTime = 0;
+// int targetFrameTimeNeighbourhood = 500; // ms => 2Hz
+// int neighbourhoodTimeEpsilon = targetFrameTimeNeighbourhood * 0.01;
+// int lastNeighbourhoodUpdate = 0;
+ int startTime = 0;
 
 const double relativeMotionHeight = 17;
 
@@ -48,7 +48,7 @@ Neighbourhood *neighbourhood = new Neighbourhood();
 
 Scheduler runner;
 Task wire1Task(20, TASK_FOREVER, &wire1Processing);
-Task wire0Task(150, TASK_FOREVER, &wire0Processing);
+Task wire0Task(200, TASK_FOREVER, &wire0Processing);
 
 
 void setup()
@@ -58,14 +58,17 @@ void setup()
     while (!Serial)
         delay(100); // will pause Zero, Leonardo, etc until serial console opens
 
-    imuProcessor->reset();
-    delay(200);
     Serial.println("------------------ SETUP --------------------");
+    // pinMode(IMU_RESET_PIN, OUTPUT); 
+    // digitalWrite(IMU_RESET_PIN, HIGH); 
+    imuProcessor->reset();
+   
+    
 
     delay(200);
 
-    Wire1.begin(SDA1, SCL1, 400000);
-    delay(300);
+    Wire1.begin(SDA1, SCL1, 1000000);
+    // delay(300);
 
     imuProcessor->init(&Wire1, 3);
     if (!imuProcessor->isConnected())
@@ -80,9 +83,10 @@ void setup()
     }
     delay(100);
     // Wire.flush();
-    pinMode(SDA, PULLUP);
-    pinMode(SCL, PULLUP);
+    // pinMode(SDA, PULLUP);
+    // pinMode(SCL, PULLUP);
     Wire.begin(SDA, SCL, 1000000);
+    //ESP.restart();
     
    
     delay(100);
@@ -97,7 +101,7 @@ void setup()
     //  Wire.setTimeOut(2);
     startTime = millis();
     runner.init();
-    delay(500);
+    delay(100);
    
     runner.addTask(wire0Task);
      wire0Task.enable();
@@ -110,7 +114,8 @@ void setup()
 
 void loop()
 {
-   
+    //wire1Processing();
+    //delay(10);
     runner.execute();
    
 }

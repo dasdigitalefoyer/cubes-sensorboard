@@ -20,8 +20,8 @@ class RelativeMotion
         bool connected = false;
 
         double deltaXY[2] = {0, 0};
-        static const int capacity = JSON_OBJECT_SIZE(2);
-        StaticJsonDocument<capacity> movementJson;
+        // static const int capacity = JSON_OBJECT_SIZE(2);
+        // StaticJsonDocument<capacity> movementJson;
         
         
 
@@ -42,7 +42,7 @@ class RelativeMotion
                 return;
             uint32_t t = millis();
             uint32_t t_diff = t-tTime;
-            if ((t_diff) >= (1000 / framerate))
+            // if ((t_diff) >= (1000 / framerate))
             {
                 if (sensor.getDistance(deltaXY) == false)
                     Serial.println("Error reading sensor 1 values");
@@ -56,7 +56,7 @@ class RelativeMotion
                     s+=String(deltaXY[1],10);
                     
                     s+=",\"dt\":";
-                    s+=String(t_diff/1000.0,5);
+                    s+=String(t_diff/1000.0,3);
                     s+="}}";
                     s+="]}";
                     Serial.println(s);
@@ -94,7 +94,7 @@ class RelativeMotion
     
             delay(100);
 
-            JsonArray sensorEvents = movementJson.createNestedArray("sensorEvents");
+            // JsonArray sensorEvents = movementJson.createNestedArray("sensorEvents");
         
         }
 
