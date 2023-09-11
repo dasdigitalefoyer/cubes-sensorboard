@@ -3,6 +3,7 @@
 #include "Imu.h"
 #include "RelativeMotion.h"
 #include "Neighbourhood.h"
+#include "BatteryMeter.h"
 #include <ArduinoJson.h>
 
 // #define _TASK_TIMECRITICAL
@@ -28,6 +29,7 @@ void printMessage(const String &msg, const String &suffix = "");
 
 void wire0Processing();
 void wire1Processing();
+void batteryMetering();
 
 int targetFrameTime = 20; // 10ms => 100Hz
 int frameStart = 0;
@@ -44,11 +46,12 @@ const double relativeMotionHeight = 17;
 ImuProcessor *imuProcessor = new ImuProcessor(1000/targetFrameTime, IMU_RESET_PIN);
 RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime, relativeMotionHeight);
 Neighbourhood *neighbourhood = new Neighbourhood();
-
+BatteryMeter *batteryMeter = new BatteryMeter(18);
 
 Scheduler runner;
 Task wire1Task(20, TASK_FOREVER, &wire1Processing);
 Task wire0Task(200, TASK_FOREVER, &wire0Processing);
+Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
 
 void setup()
@@ -109,6 +112,8 @@ void setup()
     runner.addTask(wire1Task);
     wire1Task.enable();
 
+    runner.addTask(batteryTask);
+    batteryTask.enable();
 
 }
 
@@ -135,6 +140,11 @@ void wire0Processing()
     neighbourhood->process();
 
     // Serial.printf("CLOCK: %i", Wire.getClock());
+}
+
+void batteryMetering()
+{
+    batteryMeter->process();
 }
 
 void printMessage(const String &msg, const String &suffix)
