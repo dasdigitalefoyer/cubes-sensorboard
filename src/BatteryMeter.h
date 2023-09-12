@@ -17,7 +17,7 @@ class BatteryMeter{
     }
 
     float getVoltage(){
-      return ((analogRead(analogPin) * 2.57f) / 51000)*5.7f;
+      return ((analogRead(analogPin) * 2.57f) / 51000.0f)*5.7f;
     }
 
   
