@@ -6,7 +6,7 @@
 #include "BatteryMeter.h"
 #include <ArduinoJson.h>
 
-// #define _TASK_TIMECRITICAL
+#define _TASK_TIMECRITICAL
  //#define _TASK_SLEEP_ON_IDLE_RUN
 
 const String MSG_CALIBRATE_ACCGYRO = "CALIBRATE_ACCGYRO";
@@ -49,8 +49,8 @@ Neighbourhood *neighbourhood = new Neighbourhood();
 BatteryMeter *batteryMeter = new BatteryMeter(18);
 
 Scheduler runner;
-Task wire1Task(20, TASK_FOREVER, &wire1Processing);
-Task wire0Task(200, TASK_FOREVER, &wire0Processing);
+Task wire1Task(10, TASK_FOREVER, &wire1Processing);
+Task wire0Task(150, TASK_FOREVER, &wire0Processing);
 Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
 

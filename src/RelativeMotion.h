@@ -42,7 +42,7 @@ class RelativeMotion
                 return;
             uint32_t t = millis();
             uint32_t t_diff = t-tTime;
-            // if ((t_diff) >= (1000 / framerate))
+            if ((t_diff) >= (1000 / framerate))
             {
                 if (sensor.getDistance(deltaXY) == false)
                     Serial.println("Error reading sensor 1 values");
