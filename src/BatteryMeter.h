@@ -10,14 +10,27 @@ class BatteryMeter{
     int maxCounterValue;
     int counter;
 
+    float alpha = 0.9f;
+    float lastVoltage = 0.0f;
+    float voltage = 0;
+    const float VOLTAGE_MULTIPLIER = 0.0018326206f;
+
   public:
     BatteryMeter(int analogPin = 8) {
       this->analogPin = analogPin;
       pinMode(analogPin, INPUT);
+      lastVoltage = analogRead(analogPin);
     }
 
     float getVoltage(){
-      return ((analogRead(analogPin) * 2.57f) / 51000.0f)*5.7f;
+      
+      voltage = alpha * lastVoltage + (1 - alpha) * analogRead(analogPin);
+      if(voltage > lastVoltage -3)
+      {    
+          lastVoltage = voltage;
+      }
+      
+      return voltage * VOLTAGE_MULTIPLIER;
     }
 
   
