@@ -17,6 +17,7 @@ const String MSG_CALIBRATE_MAG = "CALIBRATE_MAG";
 
 const String MSG_START_IMU = "START_IMU";
 const String MSG_STOP_IMU = "STOP_IMU";
+const String MSG_RESET = "RESET";
 
 const String MSG_SUFFIX_ACK = "ACK";
 const String MSG_SUFFIX_DONE = "DONE";
@@ -184,7 +185,13 @@ void processMessage(void *parameter)
                 // imuProcessor->calibrateMag();
                 printMessage(MSG_CALIBRATE_MAG, MSG_SUFFIX_DONE);
             }
-
+            if (msg.indexOf(MSG_RESET) > -1)
+            {
+                imuProcessor->reset();
+                
+                printMessage(MSG_RESET, MSG_SUFFIX_ACK);
+                ESP.restart();
+            }
             if (msg.indexOf(MSG_START_IMU) > -1)
             {
 
