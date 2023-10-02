@@ -148,7 +148,7 @@ public:
         
         int counter = 0;
         //counter ++;
-        int t0 = millis();
+       // int t0 = millis();
         // Serial.print("{\"sensorEvents\": [");
         String s =  "{\"sensorEvents\": [";
     
@@ -189,19 +189,19 @@ public:
                     // data["dt"] = 1.0f/ frRot;
                     s+="{\"rotation\": {";
                     s+="\"yaw\":";
-                    s+=String(ypr.yaw,10);
+                    s+=String(ypr.yaw,8);
                     s+=",\"pitch\":";
-                    s+=String(ypr.pitch,10);
+                    s+=String(ypr.pitch,8);
                     s+=",\"roll\":";
-                    s+=String(ypr.roll,10);
+                    s+=String(ypr.roll,8);
                     s+=",\"i\":";
-                    s+=String(sensorValue.un.rotationVector.i,10);
+                    s+=String(sensorValue.un.rotationVector.i,8);
                     s+=",\"j\":";
-                    s+=String(sensorValue.un.rotationVector.j,10);
+                    s+=String(sensorValue.un.rotationVector.j,8);
                     s+=",\"k\":";
-                    s+=String(sensorValue.un.rotationVector.k,10);
+                    s+=String(sensorValue.un.rotationVector.k,8);
                     s+=",\"real\":";
-                    s+=String(sensorValue.un.rotationVector.real,10);
+                    s+=String(sensorValue.un.rotationVector.real,8);
                      s+=",\"dt\":";
                     s+=String(1.0f/ frRot,5);
                     s+=",\"count\":";
@@ -237,11 +237,11 @@ public:
                    
                     s+="{\"linAcc\": {";
                     s+="\"x\":";
-                    s+=String(sensorValue.un.linearAcceleration.x,10);
+                    s+=String(sensorValue.un.linearAcceleration.x,8);
                     s+=",\"y\":";
-                    s+=String(sensorValue.un.linearAcceleration.y,10);
+                    s+=String(sensorValue.un.linearAcceleration.y,8);
                     s+=",\"z\":";
-                    s+=String(sensorValue.un.linearAcceleration.z,10);                    
+                    s+=String(sensorValue.un.linearAcceleration.z,8);                    
                     s+=",\"dt\":";
                     s+=String(1.0f/ frLinAcc,5);
                     s+=",\"count\":";
@@ -295,11 +295,11 @@ public:
 
                     s+="{\"gyro\": {";
                     s+="\"x\":";
-                    s+=String(sensorValue.un.gyroscope.x,10);
+                    s+=String(sensorValue.un.gyroscope.x,8);
                     s+=",\"y\":";
-                    s+=String(sensorValue.un.gyroscope.y,10);
+                    s+=String(sensorValue.un.gyroscope.y,8);
                     s+=",\"z\":";
-                    s+=String(sensorValue.un.gyroscope.z,10);                    
+                    s+=String(sensorValue.un.gyroscope.z,8);                    
                     s+=",\"dt\":";
                     s+=String(1.0f/ frRot,5);
                     s+=",\"count\":";

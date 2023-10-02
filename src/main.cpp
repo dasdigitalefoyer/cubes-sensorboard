@@ -42,7 +42,7 @@ int counter = 0;
 // int lastNeighbourhoodUpdate = 0;
  int startTime = 0;
 
-const double relativeMotionHeight = 17;
+const double relativeMotionHeight = 30;
 
 ImuProcessor *imuProcessor = new ImuProcessor(1000/targetFrameTime, IMU_RESET_PIN);
 RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime, relativeMotionHeight);
@@ -52,13 +52,14 @@ BatteryMeter *batteryMeter = new BatteryMeter(18);
 Scheduler runner;
 Task wire1Task(10, TASK_FOREVER, &wire1Processing);
 Task wire0Task(150, TASK_FOREVER, &wire0Processing);
+
 Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
 
 void setup()
 {
 
-    Serial.begin(230400 );
+    Serial.begin(230400   );
     while (!Serial)
         delay(100); // will pause Zero, Leonardo, etc until serial console opens
 
@@ -86,7 +87,7 @@ void setup()
         printMessage("SensorBoard:setup: Optical Flow not connected !!!");
     }
     delay(100);
-    // Wire.flush();
+    Wire.flush();
     // pinMode(SDA, PULLUP);
     // pinMode(SCL, PULLUP);
     Wire.begin(SDA, SCL, 1000000);

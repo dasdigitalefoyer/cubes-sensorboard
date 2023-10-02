@@ -51,9 +51,9 @@ class RelativeMotion
                     String s =  "{\"sensorEvents\": [";  
                     s+="{\"motion\": ";
                     s+="{\"x\": ";
-                    s+=String(deltaXY[0],10);
+                    s+=String(deltaXY[0],8);
                     s+=",\"y\":";
-                    s+=String(deltaXY[1],10);
+                    s+=String(deltaXY[1],8);
                     
                     s+=",\"dt\":";
                     s+=String(t_diff/1000.0,3);
