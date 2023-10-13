@@ -203,7 +203,7 @@ public:
                     s+=",\"real\":";
                     s+=String(sensorValue.un.rotationVector.real,8);
                      s+=",\"dt\":";
-                    s+=String(1.0f/ frRot,5);
+                    s+=String(1.0f/ this->frameRate,5);
                     s+=",\"count\":";
                     s+=String(countRot++);
                     s+="}}";
@@ -243,7 +243,7 @@ public:
                     s+=",\"z\":";
                     s+=String(sensorValue.un.linearAcceleration.z,8);                    
                     s+=",\"dt\":";
-                    s+=String(1.0f/ frLinAcc,5);
+                    s+=String(1.0f/ this->frameRate,5);
                     s+=",\"count\":";
                     s+=String(countAcc++);
                     s+="}}";
@@ -301,7 +301,7 @@ public:
                     s+=",\"z\":";
                     s+=String(sensorValue.un.gyroscope.z,8);                    
                     s+=",\"dt\":";
-                    s+=String(1.0f/ frRot,5);
+                    s+=String(1.0f/ this->frameRate,5);
                     s+=",\"count\":";
                     s+=String(countGyro++);
                     s+="}}";
@@ -517,11 +517,11 @@ private:
         
 
       
-        if (! mpu.enableReport(SH2_ROTATION_VECTOR, 1000000.0/frRot)) {
+        if (! mpu.enableReport(SH2_ROTATION_VECTOR, 1000000.0/ this->frameRate)) {
             Serial.println("Could not enable SH2_ROTATION_VECTOR");
         }
         
-        if (! mpu.enableReport(SH2_LINEAR_ACCELERATION, 1000000.0/frLinAcc)) {
+        if (! mpu.enableReport(SH2_LINEAR_ACCELERATION, 1000000.0/ this->frameRate)) {
             Serial.println("Could not enable SH2_LINEAR_ACCELERATION");
         }
         /*
@@ -540,7 +540,7 @@ private:
         //     Serial.println("Could not enable SH2_SHAKE_DETECTOR");
         // }
         */
-        if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/frRot)) {
+        if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/ this->frameRate)) {
             Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
         }
         /*

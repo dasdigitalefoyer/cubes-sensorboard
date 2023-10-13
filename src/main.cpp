@@ -32,7 +32,7 @@ void wire0Processing();
 void wire1Processing();
 void batteryMetering();
 
-int targetFrameTime = 20; // 10ms => 100Hz
+int targetFrameTime = 30; // 10ms => 100Hz
 int frameStart = 0;
 int frameStop = 0;
 int counter = 0;
@@ -51,7 +51,7 @@ BatteryMeter *batteryMeter = new BatteryMeter(18);
 
 Scheduler runner;
 Task wire1Task(10, TASK_FOREVER, &wire1Processing);
-Task wire0Task(150, TASK_FOREVER, &wire0Processing);
+Task wire0Task(120, TASK_FOREVER, &wire0Processing);
 
 Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
