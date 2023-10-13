@@ -37,6 +37,10 @@ private:
 
   bool toggleState = false;
 
+  int connectCount = 1;
+  int currentCount = 0;
+  int disconnectCount = 3;
+
   std::string hexStr(unsigned char *data, int len)
   {
     std::stringstream ss;
@@ -108,6 +112,9 @@ public:
 
     if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, true))
     {
+      currentCount = min(disconnectCount, currentCount + 1);
+      if(currentCount < connectCount)
+        return true;
       // Serial.println("Found a card! ");
       // if (!toggleState && !state)
       //   toggleState = true;
@@ -118,7 +125,7 @@ public:
       //   miscData = "";
       //   tagUID = hexStr(uid, uidLength);
       // }
-        toggleState = false;
+      //  toggleState = false;
         state = true;      
         miscData = "";
         tagUID = hexStr(uid, uidLength);
@@ -126,11 +133,13 @@ public:
     }
     else
     {
+      currentCount = max(0, currentCount - 1);
       //  Serial.println("Found no card! ");
-      if (!toggleState && state)
-        toggleState = true;
+      if (currentCount > 0)
+        // toggleState = true;
+        return true;
       else {
-        toggleState = false;
+        // toggleState = false;
         state = false;
         tagUID = "";
       }
