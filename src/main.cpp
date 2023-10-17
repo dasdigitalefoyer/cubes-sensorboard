@@ -32,7 +32,7 @@ void wire0Processing();
 void wire1Processing();
 void batteryMetering();
 
-int targetFrameTime = 30; // 10ms => 100Hz
+int targetFrameTime = 50; // 10ms => 100Hz
 int frameStart = 0;
 int frameStop = 0;
 int counter = 0;
@@ -42,7 +42,7 @@ int counter = 0;
 // int lastNeighbourhoodUpdate = 0;
  int startTime = 0;
 
-const double relativeMotionHeight = 30;
+const double relativeMotionHeight = 25;
 
 ImuProcessor *imuProcessor = new ImuProcessor(1000/targetFrameTime, IMU_RESET_PIN);
 RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime, relativeMotionHeight);
@@ -50,8 +50,8 @@ Neighbourhood *neighbourhood = new Neighbourhood();
 BatteryMeter *batteryMeter = new BatteryMeter(18);
 
 Scheduler runner;
-Task wire1Task(10, TASK_FOREVER, &wire1Processing);
-Task wire0Task(120, TASK_FOREVER, &wire0Processing);
+Task wire1Task(20, TASK_FOREVER, &wire1Processing);
+Task wire0Task(150, TASK_FOREVER, &wire0Processing);
 
 Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
