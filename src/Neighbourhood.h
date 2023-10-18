@@ -267,18 +267,22 @@ public:
     // // wireInterface->begin();
     Serial.println("INITIALIZING LEFT");
     i2cMux.setChannel(CHAN0);
+    delay(50);
     left.init(wireInterface);
     delay(50);
     Serial.println("INITIALIZING BACK");
     i2cMux.setChannel(CHAN1);
+    delay(50);
     back.init(wireInterface);
     delay(50);
     Serial.println("INITIALIZING FRONT");
     i2cMux.setChannel(CHAN2);
+    delay(50);
     front.init(wireInterface);
     delay(50);
     Serial.println("INITIALIZING RIGHT");
     i2cMux.setChannel(CHAN3);
+     delay(50);
     right.init(wireInterface);
     delay(50);
     connected = true; // TODO: check each connectionm state ?
