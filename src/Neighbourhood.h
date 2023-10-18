@@ -95,6 +95,8 @@ public:
   String getData() { return String(tagUID.c_str()); }
   String getUID() { return String(tagUID.c_str()); }
 
+
+  
   bool process(int *data)
   {
     if (!connected)
@@ -110,11 +112,8 @@ public:
     // int res = nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, true);
     // Serial.printf("READ PASSIVE TARGET ID: %i \r\n", res);
 
-    if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, true))
+    if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, false))
     {
-      currentCount = min(disconnectCount, currentCount + 1);
-      if(currentCount < connectCount)
-        return true;
       // Serial.println("Found a card! ");
       // if (!toggleState && !state)
       //   toggleState = true;
@@ -125,7 +124,7 @@ public:
       //   miscData = "";
       //   tagUID = hexStr(uid, uidLength);
       // }
-      //  toggleState = false;
+        toggleState = false;
         state = true;      
         miscData = "";
         tagUID = hexStr(uid, uidLength);
@@ -133,13 +132,11 @@ public:
     }
     else
     {
-      currentCount = max(0, currentCount - 1);
       //  Serial.println("Found no card! ");
-      if (currentCount > 0)
-        // toggleState = true;
-        return true;
+      if (!toggleState && state)
+        toggleState = true;
       else {
-        // toggleState = false;
+        toggleState = false;
         state = false;
         tagUID = "";
       }
@@ -190,6 +187,57 @@ public:
     return true;
   }
 };
+
+//   bool process(int *data)
+//   {
+//     if (!connected)
+//       return false;
+
+
+//     if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, true))
+//     {
+     
+//       currentCount = min(disconnectCount, currentCount + 1);
+//       Serial.printf("%s : Found a card!  count  %i\n",name.c_str(), currentCount);
+//       if(currentCount < connectCount)
+//         return true;
+      
+
+//         state = true;      
+//         miscData = "";
+//         tagUID = hexStr(uid, uidLength);
+     
+//     }
+//     else
+//     {
+//       currentCount = max(0, currentCount - 1);
+//       Serial.printf("%s: Found no card!  count  %i\n",name.c_str(), currentCount);
+//       //  Serial.println("Found no card! ");
+//       if (currentCount > 0)
+//         // toggleState = true;
+//         return true;
+//       else {
+//         // toggleState = false;
+//         state = false;
+//         tagUID = "";
+//       }
+        
+       
+  
+//     }
+
+//     {
+//       tagUID = hexStr(uid, uidLength);
+//       // for (byte i = 0; i < uidLength;i++) {
+//       //     tagUID+= uid[i] < 0x10 ? " 0" : ":";
+//       //     tagUID+=String(uid[i],HEX);
+
+//       // }
+//     }
+
+//     return true;
+//   }
+// };
 
 class Neighbourhood
 {
@@ -270,20 +318,20 @@ public:
     delay(50);
     left.init(wireInterface);
     delay(50);
-    Serial.println("INITIALIZING BACK");
+    Serial.println("INITIALIZING RIGHT");
     i2cMux.setChannel(CHAN1);
     delay(50);
-    back.init(wireInterface);
+    right.init(wireInterface);
     delay(50);
     Serial.println("INITIALIZING FRONT");
     i2cMux.setChannel(CHAN2);
     delay(50);
     front.init(wireInterface);
     delay(50);
-    Serial.println("INITIALIZING RIGHT");
+    Serial.println("INITIALIZING BACK");
     i2cMux.setChannel(CHAN3);
      delay(50);
-    right.init(wireInterface);
+    back.init(wireInterface);
     delay(50);
     connected = true; // TODO: check each connectionm state ?
   }
@@ -299,23 +347,23 @@ public:
 
       serialString += frameStart;
       i2cMux.setChannel(CHAN0);
-      serialString += processContact(&left) + ",";
+      // serialString += processContact(&left) + ",";
 
 
       break;
     case 1:
       i2cMux.setChannel(CHAN1);
-      serialString += processContact(&right) + ",";
+      // serialString += processContact(&right) + ",";
       break;
     case 2:
       i2cMux.setChannel(CHAN2);
-      serialString += processContact(&front) + ",";
+      // serialString += processContact(&front) + ",";
       break;
     case 3:
       i2cMux.setChannel(CHAN3);
       serialString += processContact(&back);
       serialString += frameStop;
-      Serial.println(serialString);
+      // Serial.println(serialString);
       serialString = "";
       index = 0;
       return;
