@@ -32,7 +32,7 @@ void wire0Processing();
 void wire1Processing();
 void batteryMetering();
 
-int targetFrameTime = 50; // 10ms => 100Hz
+int targetFrameTime = 20; // 10ms => 100Hz
 int frameStart = 0;
 int frameStop = 0;
 int counter = 0;
