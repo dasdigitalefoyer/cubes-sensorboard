@@ -16,7 +16,7 @@ class RelativeMotion
         bool useMM = true;
         PAA5100JE_OF sensor;
         double height = 0;
-        uint32_t tTime;
+        uint32_t tTime = 0;
         bool connected = false;
 
         double deltaXY[2] = {0, 0};
@@ -96,6 +96,7 @@ class RelativeMotion
 
             // JsonArray sensorEvents = movementJson.createNestedArray("sensorEvents");
         
+            tTime = millis();
         }
 
         bool isConnected() { return connected;}

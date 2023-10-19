@@ -83,6 +83,7 @@ public:
 
     // configure board to read RFID tags
     nfc->SAMConfig();
+  
 
     
     // nfc->startPassiveTargetIDDetection(PN532_MIFARE_ISO14443A);
@@ -114,7 +115,7 @@ public:
 
     if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, false))
     {
-      // Serial.println("Found a card! ");
+        // Serial.printf("%s: Found a card! \n",name.c_str());
       // if (!toggleState && !state)
       //   toggleState = true;
       // else {
@@ -128,17 +129,19 @@ public:
         state = true;      
         miscData = "";
         tagUID = hexStr(uid, uidLength);
-     
+        nfc->setPassiveActivationRetries(0x01);
+        // nfc->inRelease(0x00);
     }
     else
     {
-      //  Serial.println("Found no card! ");
+      // Serial.printf("%s: Found no card! \n",name.c_str());
       if (!toggleState && state)
         toggleState = true;
       else {
         toggleState = false;
         state = false;
         tagUID = "";
+        nfc->setPassiveActivationRetries(0x00);
       }
         
        
@@ -308,6 +311,7 @@ public:
 
   void init(TwoWire &wireInterface)
   {
+    delay(50);
     i2cMux.begin(0U, wireInterface);
     Serial.println("INITIALIZING NEIGHBOURHOOD");
 
@@ -347,23 +351,23 @@ public:
 
       serialString += frameStart;
       i2cMux.setChannel(CHAN0);
-      // serialString += processContact(&left) + ",";
+      serialString += processContact(&left) + ",";
 
 
       break;
     case 1:
       i2cMux.setChannel(CHAN1);
-      // serialString += processContact(&right) + ",";
+      serialString += processContact(&right) + ",";
       break;
     case 2:
       i2cMux.setChannel(CHAN2);
-      // serialString += processContact(&front) + ",";
+      serialString += processContact(&front) + ",";
       break;
     case 3:
       i2cMux.setChannel(CHAN3);
       serialString += processContact(&back);
       serialString += frameStop;
-      // Serial.println(serialString);
+      Serial.println(serialString);
       serialString = "";
       index = 0;
       return;

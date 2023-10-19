@@ -115,6 +115,7 @@ public:
         setReports();
     
         // delay(500);       
+       
      
 
     }
@@ -134,6 +135,12 @@ public:
         if (mpu.wasReset()) {
             Serial.print("sensor was reset ");
             setReports();
+
+            timeRot = millis();
+            timeAcc = millis();
+            timeGyro = millis();
+            timeStability = millis();
+            return;
         }
         // Serial.println("PROCESSING ");
         // Serial.flush();
@@ -143,14 +150,16 @@ public:
         // JsonArray sensorEvents = imuJson.createNestedArray("sensorEvents");
        
         uint16_t reportId = 0;
+        int time = millis();  
       
-      
+
         
         int counter = 0;
         //counter ++;
        // int t0 = millis();
         // Serial.print("{\"sensorEvents\": [");
         String s =  "{\"sensorEvents\": [";
+    
     
         while(mpu.getSensorEvent(&sensorValue))
         {
@@ -203,9 +212,11 @@ public:
                     s+=",\"real\":";
                     s+=String(sensorValue.un.rotationVector.real,8);
                      s+=",\"dt\":";
-                    s+=String(1.0f/ this->frameRate,5);
-                    s+=",\"count\":";
-                    s+=String(countRot++);
+                    s+=String((time-timeRot) * 0.001,5);
+
+                    timeRot= time;
+                    // s+=",\"count\":";
+                    // s+=String(countRot++);
                     s+="}}";
                     break;
                 }
@@ -243,10 +254,12 @@ public:
                     s+=",\"z\":";
                     s+=String(sensorValue.un.linearAcceleration.z,8);                    
                     s+=",\"dt\":";
-                    s+=String(1.0f/ this->frameRate,5);
-                    s+=",\"count\":";
-                    s+=String(countAcc++);
+                    s+=String((time-timeAcc) * 0.001,5);
+                    // s+=",\"count\":";
+                    // s+=String(countAcc++);
                     s+="}}";
+
+                    timeAcc = time;
                     break;
                 }
                 case SH2_TEMPERATURE:
@@ -274,7 +287,7 @@ public:
                     // data["z"] = sensorValue.un.gravity.z;
                     Serial.print(sensorValue.un.gravity.z);                    
                     Serial.print(",\"dt\":");
-                    Serial.print(1.0f/ frLinAcc);
+                    Serial.print(1.0f/ frameRate);
                     // data["dt"] = 1.0f/ frLinAcc;
                     // data["count"] = countGrav++;
                     Serial.print(",\"count\":");
@@ -301,10 +314,11 @@ public:
                     s+=",\"z\":";
                     s+=String(sensorValue.un.gyroscope.z,8);                    
                     s+=",\"dt\":";
-                    s+=String(1.0f/ this->frameRate,5);
-                    s+=",\"count\":";
-                    s+=String(countGyro++);
+                    s+=String((time-timeGyro) * 0.001,5);
+                    // s+=",\"count\":";
+                    // s+=String(countGyro++);
                     s+="}}";
+                    timeGyro = time;
                     break;
                 }
 
@@ -475,10 +489,15 @@ private:
    
     // static const int capacity = JSON_OBJECT_SIZE(32);
 
-    const int frLinAcc = 50;        // Hz
-    const int frRot = 50;
+  
     
-    const int frStability = 20;
+    int frStability = 5;
+
+    float timeAcc = 0;        // Hz
+    float timeRot = 0;
+    float timeGyro = 0;
+    
+    float timeStability = 0;
 
     int countAcc = 0;
     int countGrav = 0;
@@ -521,7 +540,7 @@ private:
             Serial.println("Could not enable SH2_ROTATION_VECTOR");
         }
         
-        if (! mpu.enableReport(SH2_LINEAR_ACCELERATION, 1000000.0/ this->frameRate)) {
+        if (! mpu.enableReport(SH2_LINEAR_ACCELERATION, 1000000.0/ this->frameRate * 1.1)) {
             Serial.println("Could not enable SH2_LINEAR_ACCELERATION");
         }
         /*
@@ -540,7 +559,7 @@ private:
         //     Serial.println("Could not enable SH2_SHAKE_DETECTOR");
         // }
         */
-        if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/ this->frameRate)) {
+        if (! mpu.enableReport(SH2_GYROSCOPE_CALIBRATED, 1000000.0/ this->frameRate* 2)) {
             Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
         }
         /*

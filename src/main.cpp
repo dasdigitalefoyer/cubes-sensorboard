@@ -45,13 +45,13 @@ int counter = 0;
 const double relativeMotionHeight = 25;
 
 ImuProcessor *imuProcessor = new ImuProcessor(1000/targetFrameTime, IMU_RESET_PIN);
-RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime, relativeMotionHeight);
+RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime , relativeMotionHeight); // double framerate
 Neighbourhood *neighbourhood = new Neighbourhood();
 BatteryMeter *batteryMeter = new BatteryMeter(18);
 
 Scheduler runner;
-Task wire1Task(20, TASK_FOREVER, &wire1Processing);
-Task wire0Task(150, TASK_FOREVER, &wire0Processing);
+Task wire1Task(10, TASK_FOREVER, &wire1Processing);
+Task wire0Task(250, TASK_FOREVER, &wire0Processing);
 
 Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
@@ -114,8 +114,8 @@ void setup()
     runner.addTask(wire1Task);
     wire1Task.enable();
 
-    runner.addTask(batteryTask);
-    batteryTask.enable();
+    // runner.addTask(batteryTask);
+    // batteryTask.enable();
 
 }
 
