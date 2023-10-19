@@ -104,27 +104,9 @@ public:
       return false;
 
 
-    
-
-
-
-    
- 
-    // int res = nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, true);
-    // Serial.printf("READ PASSIVE TARGET ID: %i \r\n", res);
-
     if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, false))
     {
-        // Serial.printf("%s: Found a card! \n",name.c_str());
-      // if (!toggleState && !state)
-      //   toggleState = true;
-      // else {
-      //   toggleState = false;
-      //   state = true;
-      //   // tagUID = "";
-      //   miscData = "";
-      //   tagUID = hexStr(uid, uidLength);
-      // }
+     
         toggleState = false;
         state = true;      
         miscData = "";
@@ -147,44 +129,12 @@ public:
        
   
     }
-    // uint8_t password[4] =  {0x12, 0x34, 0x56, 0x78};
+  
 
-    // wait until a tag is present
-    // if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength,0,false)) {
-    //   //if(toggleState && state)
-    //   {
-    //     state = true;
-    //     // tagUID = "";
-    //     miscData = "";
-    //     tagUID = hexStr(uid, uidLength);
-    //     toggleState = false;
-    //   }
-    //   //if(state)
-    //     toggleState = true;
-
-    //   // return true;
-    // }
-    // else
-    // {
-    //    state = false;
-    //     tagUID = ""; 
-    // }
-    // if(toggleState && !state)
-    // {
-    //   state = true;
-    //   toggleState = false;
-    // }
-    // if(!state)
-    //   toggleState = true;
-
-    // if(tagUID.empty())
+    if(tagUID.empty())
     {
       tagUID = hexStr(uid, uidLength);
-      // for (byte i = 0; i < uidLength;i++) {
-      //     tagUID+= uid[i] < 0x10 ? " 0" : ":";
-      //     tagUID+=String(uid[i],HEX);
-
-      // }
+    
     }
 
     return true;

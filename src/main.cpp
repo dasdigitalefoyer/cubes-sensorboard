@@ -45,7 +45,7 @@ int counter = 0;
 const double relativeMotionHeight = 25;
 
 ImuProcessor *imuProcessor = new ImuProcessor(1000/targetFrameTime, IMU_RESET_PIN);
-RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime , relativeMotionHeight); // double framerate
+RelativeMotion *relativeMotion = new RelativeMotion(1000/targetFrameTime , relativeMotionHeight); 
 Neighbourhood *neighbourhood = new Neighbourhood();
 BatteryMeter *batteryMeter = new BatteryMeter(18);
 
