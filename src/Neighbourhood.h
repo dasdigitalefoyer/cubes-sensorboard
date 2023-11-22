@@ -141,56 +141,6 @@ public:
   }
 };
 
-//   bool process(int *data)
-//   {
-//     if (!connected)
-//       return false;
-
-
-//     if (nfc->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 0, true))
-//     {
-     
-//       currentCount = min(disconnectCount, currentCount + 1);
-//       Serial.printf("%s : Found a card!  count  %i\n",name.c_str(), currentCount);
-//       if(currentCount < connectCount)
-//         return true;
-      
-
-//         state = true;      
-//         miscData = "";
-//         tagUID = hexStr(uid, uidLength);
-     
-//     }
-//     else
-//     {
-//       currentCount = max(0, currentCount - 1);
-//       Serial.printf("%s: Found no card!  count  %i\n",name.c_str(), currentCount);
-//       //  Serial.println("Found no card! ");
-//       if (currentCount > 0)
-//         // toggleState = true;
-//         return true;
-//       else {
-//         // toggleState = false;
-//         state = false;
-//         tagUID = "";
-//       }
-        
-       
-  
-//     }
-
-//     {
-//       tagUID = hexStr(uid, uidLength);
-//       // for (byte i = 0; i < uidLength;i++) {
-//       //     tagUID+= uid[i] < 0x10 ? " 0" : ":";
-//       //     tagUID+=String(uid[i],HEX);
-
-//       // }
-//     }
-
-//     return true;
-//   }
-// };
 
 class Neighbourhood
 {
@@ -300,21 +250,21 @@ public:
     case 0:
 
       serialString += frameStart;
-      i2cMux.setChannel(CHAN0);
+      i2cMux.setChannel(CHAN0 | CHAN4);
       serialString += processContact(&left) + ",";
 
 
       break;
     case 1:
-      i2cMux.setChannel(CHAN1);
+      i2cMux.setChannel(CHAN1 | CHAN5);
       serialString += processContact(&right) + ",";
       break;
     case 2:
-      i2cMux.setChannel(CHAN2);
+      i2cMux.setChannel(CHAN2 | CHAN6);
       serialString += processContact(&front) + ",";
       break;
     case 3:
-      i2cMux.setChannel(CHAN3);
+      i2cMux.setChannel(CHAN3 | CHAN7);
       serialString += processContact(&back);
       serialString += frameStop;
       Serial.println(serialString);
