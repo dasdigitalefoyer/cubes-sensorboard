@@ -114,8 +114,8 @@ void setup()
     runner.addTask(wire1Task);
     wire1Task.enable();
 
-    // runner.addTask(batteryTask);
-    // batteryTask.enable();
+    runner.addTask(batteryTask);
+    batteryTask.enable();
 
 }
 
