@@ -8,3 +8,6 @@ Just pull, install platformIO, build and deploy to the board.
 
 # Documentation
 Please read the documentation and additional infos in the main repo: https://github.com/dasdigitalefoyer/cubes-documentation
+
+# Build with docker
+A Dockerfile is added for building and uoloading the code. 
