@@ -51,7 +51,7 @@ BatteryMeter *batteryMeter = new BatteryMeter(18);
 
 Scheduler runner;
 Task wire1Task(10, TASK_FOREVER, &wire1Processing);
-Task wire0Task(250, TASK_FOREVER, &wire0Processing);
+Task wire0Task(200, TASK_FOREVER, &wire0Processing);
 
 Task batteryTask(1000, TASK_FOREVER, &batteryMetering);
 
